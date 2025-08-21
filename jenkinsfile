@@ -8,11 +8,10 @@ pipeline {
 	environment {
 	    APP_NAME = "register-app-pipeline"
             RELEASE = "1.0.0"
-            DOCKER_USER = "rohithakshan"
+            DOCKER_USER = "rohithaksha"
             DOCKER_PASS = 'dockerhub'
             IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
             IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
-	    JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
     }
 
     stages{
@@ -24,7 +23,7 @@ pipeline {
 
         stage("Checkout from SCM"){
                 steps {
-                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/Rohithaksha01/register-app'
+                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/Rohithaksha01/register-app-2025'
                 }
         }
       
@@ -40,7 +39,6 @@ pipeline {
                  sh "mvn test"
            }
        }
-
         stage("SonarQube Analysis"){
            steps {
 	           script {
@@ -50,15 +48,16 @@ pipeline {
 	           }	
            }
        }
-
+		
         stage("Quality Gate"){
            steps {
                script {
                     waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
                 }	
             }
-        }
 
+        }
+		
 		stage("Build & Push Docker Image") {
             steps {
                 script {
@@ -80,7 +79,6 @@ pipeline {
 	            sh ('docker run -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image rohithakshan/register-app-pipeline:latest --no-progress --scanners vuln  --exit-code 0 --severity HIGH,CRITICAL --format table')
                }
            }
-       }
-
+       }
     }
 }
